@@ -173,6 +173,3 @@ Recommended screenshots/evidence:
 5. Seeded project visible in the database
 6. README/API documentation
 
-## Important
-
-This is a starter architecture, not a claim that every final production requirement has been implemented. Confirm API contracts and security controls with the Product Manager, BA, Frontend Developer and Cybersecurity Analyst before integration.
