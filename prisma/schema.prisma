@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ProjectStatus {
+  DRAFT
+  PUBLISHED
+  UNPUBLISHED
+}
+
+enum SelectionStatus {
+  ACTIVE
+  COMPLETED
+}
+
+enum SubmissionStatus {
+  SUBMITTED
+  REVIEWED
+}
+
+model User {
+  id          String             @id @default(uuid())
+  email       String             @unique
+  password    String
+  name        String?
+  role        Role               @default(USER)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  selections  ProjectSelection[]
+  submissions Submission[]
+}
+
+model Industry {
+  id       String    @id @default(uuid())
+  name     String    @unique
+  projects Project[]
+}
+
+model Project {
+  id              String            @id @default(uuid())
+  title           String
+  description     String
+  companyName     String?
+  scenario       String
+  businessProblem String
+  objective       String
+  context         String?
+  userRole        String?
+  difficulty      Difficulty
+  status          ProjectStatus     @default(DRAFT)
+  industryId      String
+  industry        Industry          @relation(fields: [industryId], references: [id])
+
+  tasks           Task[]
+  deliverables    Deliverable[]
+  selections      ProjectSelection[]
+
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  publishedAt     DateTime?
+
+  @@index([industryId])
+  @@index([difficulty])
+  @@index([status])
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  projectId   String
+  title       String
+  description String
+  order       Int
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, order])
+}
+
+model Deliverable {
+  id             String       @id @default(uuid())
+  projectId      String
+  title          String
+  description    String?
+  required       Boolean      @default(true)
+  submissionType String       @default("FILE")
+
+  project        Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  submissions    Submission[]
+
+  @@index([projectId])
+}
+
+model ProjectSelection {
+  id          String          @id @default(uuid())
+  userId      String
+  projectId   String
+  status      SelectionStatus @default(ACTIVE)
+  startedAt   DateTime        @default(now())
+  completedAt DateTime?
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project     Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+  @@index([projectId])
+}
+
+model Submission {
+  id            String           @id @default(uuid())
+  userId        String
+  projectId     String
+  deliverableId String
+  fileUrl       String
+  fileName      String
+  status        SubmissionStatus @default(SUBMITTED)
+  submittedAt   DateTime         @default(now())
+
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliverable   Deliverable @relation(fields: [deliverableId], references: [id], onDelete: Cascade)
+
+  @@index([userId, projectId])
+  @@index([deliverableId])
+}
