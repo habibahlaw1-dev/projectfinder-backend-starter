@@ -162,14 +162,4 @@ npm run typecheck
 npm run build
 ```
 
-## Week 1 evidence
-
-Recommended screenshots/evidence:
-
-1. Repository and folder structure
-2. `/api/v1/health` response
-3. Prisma schema / ERD
-4. Successful local database migration
-5. Seeded project visible in the database
-6. README/API documentation
 
